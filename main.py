@@ -45,12 +45,12 @@ def home():
 @app.route('/Chicago')
 def chi():
     weather = get_weather("Chicago")
-    return render_template('city.html', city = "Chicago")
+    return render_template('city.html', city = "Chicago", weather = weather)
 
 @app.route('/Tokyo')
 def tokyo():
     weather = get_weather("Tokyo")
-    return render_template('city.html', city = "Tokyo")
+    return render_template('city.html', city = "Tokyo", weather = weather)
 
 if __name__ == '__main__':
     app.run(debug=True)
