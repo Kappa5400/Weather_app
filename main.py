@@ -10,22 +10,22 @@ openmeteo = openmeteo_requests.Client(session = retry_session)
 def get_weather(city):
 
     city_dict = {
-        "name": "Chicago" "Tokyo",
-        "lat": "42" "-88",
-        "long": "36" "140",
+        "Chicago": {lat:42, long: 36},
+        "Tokyo" : {lat: -88, long: 140}
     }
 
     url = "https://api.open-meteo.com/v1/forecast"
 
-    lat = 52
-    long = 13
+    lat = 0
+    long = 0
 
-    for i in city_dict['name']:
+    for i in city_dict:
+        print(i)
         if i == city:
-            lat = float(city_dict["lat"])
-            long = float(city_dict["long"])
+            lat = city_dict {i}{"lat"}}
+            long = (city_dict["long"]
         elif i != city:
-            print("Skip")
+        
 
     params = {
         f"latitude": lat,
@@ -37,7 +37,19 @@ def get_weather(city):
     responses = openmeteo.weather_api(url, params=params)
 
     response = responses[0]
+    print(f"Coordinates {response.Latitude()}°N {response.Longitude()}°E")
+    print(f"Elevation {response.Elevation()} m asl")
+    print(f"Timezone {response.Timezone()} {response.TimezoneAbbreviation()}")
+    print(f"Timezone difference to GMT+0 {response.UtcOffsetSeconds()} s")
+    
+    current = response.Current()
 
+    current_temperature_2m = current.Variables(0).Value()
+
+    print(f"Current time {current.Time()}")
+
+    print(f"Current temperature_2m {current_temperature_2m}")
+    
     hourly = response.Hourly()
     print(hourly)
 
