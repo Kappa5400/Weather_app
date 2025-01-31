@@ -17,24 +17,32 @@ def get_weather(city):
 
     url = "https://api.open-meteo.com/v1/forecast"
 
-    lat = 0
-    long = 0
+    lat = 0.0
+    long = 0.0
 
     for i in city_dict["name"]:
         if i == city:
-            lat = city_dict["lat"]
-            long = city_dict["long"]
+            lat = float(city_dict["lat"])
+            long = float(city_dict["long"])
 
     params = {
         f"latitude": lat,
 	    f"longitude": long,
-	    f"hourly": "temperature_2m"
+	    "current" : "temperature_2m"
     }
 
     responses = openmeteo.weather_api(url, params=params)
 
-    return responses
+    for i in responses:
+        print(i)
 
+
+
+    return responses[0]
+
+get_weather("Chicago")
+
+'''
 app = Flask(__name__)
 
 
@@ -54,3 +62,4 @@ def tokyo():
 
 if __name__ == '__main__':
     app.run(debug=True)
+'''
