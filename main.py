@@ -17,13 +17,15 @@ def get_weather(city):
 
     url = "https://api.open-meteo.com/v1/forecast"
 
-    lat = 0.0
-    long = 0.0
+    lat = 52
+    long = 13
 
-    for i in city_dict["name"]:
+    for i in city_dict['name']:
         if i == city:
             lat = float(city_dict["lat"])
             long = float(city_dict["long"])
+        elif i != city:
+            print("Skip")
 
     params = {
         f"latitude": lat,
@@ -33,12 +35,13 @@ def get_weather(city):
 
     responses = openmeteo.weather_api(url, params=params)
 
-    for i in responses:
-        print(i)
+    response = responses[0]
+
+    hourly = response.Hourly()
+    print(hourly)
 
 
-
-    return responses[0]
+    return response
 
 get_weather("Chicago")
 
