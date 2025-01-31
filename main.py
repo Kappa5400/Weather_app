@@ -30,7 +30,8 @@ def get_weather(city):
     params = {
         f"latitude": lat,
 	    f"longitude": long,
-	    "current" : "temperature_2m"
+	    "current" : "temperature_2m",
+        "temperature_unit": "fahrenheit"
     }
 
     responses = openmeteo.weather_api(url, params=params)
