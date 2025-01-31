@@ -1,9 +1,17 @@
 <!DOCTYPE html>
 <html>
     <p> Hello {{ city }}</p>
-    <p> Below is your weather forecast.</p>
+    <p> Below is your weather and location.</p>
 
-    <p>{{ weather }}</p>
+
+    <p> Current temperature:{{ weather ["Current temperature_2m"] }}</p>
+    <p> Coordinates: {{weather ["Coordinates"] }} </p>
+    <p> Timezone: {{ weather ["Timezone"] }} </p>
+    <p> Timezone difference to GMT+0: {{ weather ["Timezone difference to GMT+0"] }} </p>
+    <p> Current time: {{ weather ["Current time"] }} </p>
+    <p> Current temperature_2m: {{ weather ["Current temperature_2m"] }} </p>
+    <p> Hourly: {{ weather ["Hourly"] }} </p>
+
 
     <p><a href="/">Go back </a></p>
 

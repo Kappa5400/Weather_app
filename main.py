@@ -10,8 +10,8 @@ openmeteo = openmeteo_requests.Client(session = retry_session)
 def get_weather(city):
 
     city_dict = {
-        "Chicago": {lat:42, long: 36},
-        "Tokyo" : {lat: -88, long: 140}
+        "Chicago": {"lat": 42.0, "long" : 36.0},
+        "Tokyo" : {"lat": 36.0, "long": 140.0}
     }
 
     url = "https://api.open-meteo.com/v1/forecast"
@@ -22,10 +22,9 @@ def get_weather(city):
     for i in city_dict:
         print(i)
         if i == city:
-            lat = city_dict {i}{"lat"}}
-            long = (city_dict["long"]
-        elif i != city:
-        
+            lat = city_dict [i]["lat"]
+            long = city_dict[i]["long"]
+            break
 
     params = {
         f"latitude": lat,
@@ -37,28 +36,23 @@ def get_weather(city):
     responses = openmeteo.weather_api(url, params=params)
 
     response = responses[0]
-    print(f"Coordinates {response.Latitude()}°N {response.Longitude()}°E")
-    print(f"Elevation {response.Elevation()} m asl")
-    print(f"Timezone {response.Timezone()} {response.TimezoneAbbreviation()}")
-    print(f"Timezone difference to GMT+0 {response.UtcOffsetSeconds()} s")
-    
+
     current = response.Current()
 
     current_temperature_2m = current.Variables(0).Value()
 
-    print(f"Current time {current.Time()}")
+    weather = {
+        "Coordinates" : f"{response.Latitude()}°N {response.Longitude()}°E",
+        "Elevation" : f"{response.Elevation()} m asl",
+        "Timezone" : f"{response.Timezone()} {response.TimezoneAbbreviation()})",
+        "Timezone difference to GMT+0" : f"{response.UtcOffsetSeconds()} s",
+        "Current time" : {current.Time()},
+        "Current temperature_2m" : {current_temperature_2m},
+        "Hourly" : {response.Hourly}
+    }
 
-    print(f"Current temperature_2m {current_temperature_2m}")
-    
-    hourly = response.Hourly()
-    print(hourly)
+    return weather
 
-
-    return response
-
-get_weather("Chicago")
-
-'''
 app = Flask(__name__)
 
 
@@ -78,4 +72,3 @@ def tokyo():
 
 if __name__ == '__main__':
     app.run(debug=True)
-'''
