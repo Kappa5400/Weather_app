@@ -1,7 +1,9 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, session, redirect, url_for
 import openmeteo_requests
 import requests_cache
 from retry_requests import retry
+from datetime import timedelta
+
 
 cache_session = requests_cache.CachedSession(".cache', expires_after = 3600")
 retry_session = retry(cache_session, retries = 5, backoff_factor =0.2)
@@ -54,11 +56,22 @@ def get_weather(city):
     return weather
 
 app = Flask(__name__)
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite"
 
-
-@app.route('/')
+@app.route('/', method=["POST", "GET"] )
 def home():
-    return render_template('index.html')
+    city = None
+    if request.method == "POST":
+        city = request.form["city"]
+        session["city"] = city
+    else:
+        if "city" in session:
+            city = session["city"]
+    #clear session, still use city.
+    temp = city
+    session.pop("city", None)
+    return render_template('index.html', temp=city)
+    
 
 @app.route('/Chicago')
 def chi():
