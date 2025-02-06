@@ -1,5 +1,4 @@
 from crypt import methods
-
 from flask import Flask, render_template, request, session, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 import openmeteo_requests
@@ -7,7 +6,6 @@ import requests_cache
 from pandas.core.indexes.multi import names_compat
 from retry_requests import retry
 from datetime import timedelta
-
 from sqlalchemy.testing import db
 
 app = Flask(__name__)
@@ -21,24 +19,36 @@ cache_session = requests_cache.CachedSession(".cache', expires_after = 3600")
 retry_session = retry(cache_session, retries = 5, backoff_factor =0.2)
 openmeteo = openmeteo_requests.Client(session = retry_session)
 
-def get_weather(city):
+
+def get_geo(city):
+
+    url = f"https://geocoding-api.open-meteo.com/v1/search{city}?name=&count=1&language=en&format=json"
+
+    responses = openmeteo.weather_api(url)
+    lat = responses.Latitude()
+    long = responses.Longitude()
+
+    return lat, long
+
+
+def get_weather(city, **kwargs):
+    long = kwargs.get('long', None)
+    lat = kwargs.get('lat', None)
+
+    url = "https://api.open-meteo.com/v1/forecast"
 
     city_dict = {
         "Chicago": {"lat": 42.0, "long" : 36.0},
         "Tokyo" : {"lat": 36.0, "long": 140.0}
     }
 
-    url = "https://api.open-meteo.com/v1/forecast"
-
-    lat = 0
-    long = 0
-
-    for i in city_dict:
-        print(i)
-        if i == city:
-            lat = city_dict [i]["lat"]
-            long = city_dict[i]["long"]
-            break
+    if long == None:
+        for i in city_dict:
+            print(i)
+            if i == city:
+                lat = city_dict [i]["lat"]
+                long = city_dict[i]["long"]
+                break
 
     params = {
         f"latitude": lat,
@@ -67,7 +77,7 @@ def get_weather(city):
 
     return weather
 
-class cities(db.model):
+class cities(db.Model):
     _id = db.Column("id", db.Integer, primary_key=True)
     city = db.Column("city", db.String(20))
     coordinates = db.Column('coordinates', db.string(20))
@@ -86,6 +96,11 @@ def home():
     if request.method == "POST":
         city = request.form["city"]
         session["city"] = city
+        lat, long = get_geo(city)
+        get_weather(city,)
+        city = cities(city, )
+        db.commit()
+
         flash("Added!")
     else:
         if "city" in session:
@@ -94,7 +109,7 @@ def home():
     return render_template('data.html', city=city)
 
 
-@@app.route("/login", methods=["POST", "GET"])
+@app.route("/login", methods=["POST", "GET"])
 def login():
     if request.method == "POST":
         session.permanent = True  # <--- makes the permanent session
@@ -136,5 +151,5 @@ def data():
     return render_template('data.html')
 
 if __name__ == '__main__':
-    db.create all()
+    db.create_all()
     app.run(debug=True)
