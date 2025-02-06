@@ -1,9 +1,8 @@
-from crypt import methods
+
 from flask import Flask, render_template, request, session, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 import openmeteo_requests
 import requests_cache
-from pandas.core.indexes.multi import names_compat
 from retry_requests import retry
 from datetime import timedelta
 from sqlalchemy.testing import db
@@ -32,8 +31,8 @@ def get_geo(city):
 
 
 def get_weather(city, **kwargs):
-    long = kwargs.get('long', None)
     lat = kwargs.get('lat', None)
+    long = kwargs.get('long', None)
 
     url = "https://api.open-meteo.com/v1/forecast"
 
@@ -96,10 +95,15 @@ def home():
     if request.method == "POST":
         city = request.form["city"]
         session["city"] = city
-        lat, long = get_geo(city)
-        get_weather(city,)
-        city = cities(city, )
-        db.commit()
+
+        found_city = cities.query.filter_by(city=city).first()
+        if found_city:
+            session["city"] = found_city.city
+        else:
+            lat, long = get_geo(city)
+            get_weather(city,lat,long)
+            city = cities(city, )
+            db.commit()
 
         flash("Added!")
     else:
