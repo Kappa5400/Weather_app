@@ -5,23 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     {% extends "base.html" %}
-    <h1>weather</h1>
+    <h1>Data</h1>
 </head>
 <body>
 
-{%block content %}
-
-    <h3>Select a city to find out its current weather and other facts.</h3>
-    <li><a href="Chicago">Chicago</a></li>
-    <li><a href="Tokyo">Tokyo</a></li>
-
-
-
-
-    <form action ="#" method="POST">
-        <input type=City" name="City" placeholder="Add a city." value ="{{city if city}}"/>
-        <input type="submit" value="submit"/>
-    </form>
+{% block content %}
+<h2> {% city %} Has been added!</h2>
 {% endblock %}
 
 </body>
