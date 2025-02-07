@@ -6,12 +6,28 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     {% extends "base.html" %}
     <h1>Data</h1>
+    <style>
+        table, th, td {
+        border:1px solid black;
+        }
+    </style>
 </head>
-<body>
-
-{% block content %}
-<h2> {% city %} Has been added!</h2>
-{% endblock %}
-
-</body>
+    <body>
+    {% block content %}
+        <table style="width:100%">
+            <tr>
+                <th>City</th>
+                <th>Cooridnates</th>
+                <th>Elevation</th>
+            </tr>
+            {% for city in cities %}
+                <tr>
+                    <td>{{cities[0]}}</td>
+                    <td>{{cities[1]}}</td>
+                    <td>{{cities[2]}}</td>
+                </tr>
+            {%endfor%}
+            </table>
+        {% endblock %}
+    </body>
 </html>

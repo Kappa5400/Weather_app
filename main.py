@@ -1,29 +1,22 @@
-
-from flask import Flask, render_template, request, session, redirect, url_for, flash
-from flask_sqlalchemy import SQLAlchemy
+from flask import Flask, render_template, current_app, g
 import openmeteo_requests
 import requests_cache
+import click
+from datetime import datetime
 from retry_requests import retry
-from datetime import timedelta
-from sqlalchemy.testing import db
-from sqlalchemy.orm import DeclarativeBase
+import sqlite3
+from os import path
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite"
-app.secret_key = "hello"
-app.config['SQALCHEMY_DATABASE_URI'] = 'sqlite:///cities.sqlite3'
-app.config["SQALCHEMY_TRACK_MODIFICATIONS"] = False
-app.permanent_session_lifetime = timedelta(minutes=5)
-db.init_app(app)
+
+ROOT = path.dirname(path.realpath(__file__))
 
 cache_session = requests_cache.CachedSession(".cache', expires_after = 3600")
 retry_session = retry(cache_session, retries = 5, backoff_factor =0.2)
 openmeteo = openmeteo_requests.Client(session = retry_session)
 
-class Base(DeclarativeBase):
-    pass
-
-db = SQLAlchemy(model_class=Base)
+DATABASE = 'database.db'
+db = sqlite3.connect(path.join(ROOT, 'database.db'))
 
 def get_geo(city):
 
@@ -82,68 +75,49 @@ def get_weather(city, **kwargs):
 
     return weather
 
-class cities(db.Model):
-    _id = db.Column("id", db.Integer, primary_key=True)
-    city = db.Column("city", db.String(20))
-    coordinates = db.Column('coordinates', db.string(20))
-    elevation = db.Column("elevation", db.string(20))
+def init_db():
+    with app.app_context():
+        db = get_db()
+        with app.open_resource('schema.sql', mode='r') as f:
+            db.cursor().executescript(f.read())
+            db.commit()
 
-    def __init__(self, city, coordinates, elevation):
-        self.city = city
-        self.coordinates = coordinates
-        self.elevation = elevation
+
+def get_db():
+    if 'db' not in g:
+        g.db = sqlite3.connect(
+            current_app.config['DATABASE'],
+            detect_types=sqlite3.PARSE_DECLTYPES
+        )
+        g.db.row_factory = sqlite3.Row
+
+    return g.db
+
+def query_db(query, args=(), one=False):
+    cur = get_db().execute(query, args)
+    rv = cur.fetchall()
+    cur.close()
+    return (rv[0] if rv else None) if one else rv
+
+def close_db(e=None):
+    db = g.pop('db', None)
+
+    if db is not None:
+        db.close()
+
 
 @app.route('/', methods=["POST", "GET"] )
 def home():
-    city = None
-    if "city" in session:
-        city = session["city"]
-    if request.method == "POST":
-        city = request.form["city"]
-        session["city"] = city
+    return render_template('index.html')
 
-        found_city = cities.query.filter_by(city=city).first()
-        if found_city:
-            session["city"] = found_city.city
-        else:
-            lat, long = get_geo(city)
-            get_weather(city,lat,long)
-            city = cities(city, )
-            db.commit()
+@click.command('init-db')
+def init_db_command():
+    init_db()
+    click.echo("Initialized the database.")
 
-        flash("Added!")
-    else:
-        if "city" in session:
-            city = session["city"]
-    return render_template('data.html', city=city)
-
-
-@app.route("/login", methods=["POST", "GET"])
-def login():
-    if request.method == "POST":
-        session.permanent = True  # <--- makes the permanent session
-        user = request.form["nm"]
-        session["user"] = user
-        flash("Login Succeseful!")
-        return redirect(url_for("user"))
-    else:
-        if "user" in session:
-            flash("Already Logged In!")
-            return redirect(url_for("user"))
-
-        return render_template("login.html")
-
-@app.route("/logout")
-def logout():
-    session.pop("user", None)
-    return redirect(url_for("login"))
-
-
-@app.route("/<usr>")
-def user(usr):
-    return f"<h1>Hi {usr}.</h1<a href="/">Go back</a>"
-
-
+sqlite3.register_converter(
+    "timestamp", lambda v: datetime.fromisoformat(v.decode())
+)
 
 @app.route('/Chicago')
 def chi():
@@ -160,5 +134,5 @@ def data():
     return render_template('data.html')
 
 if __name__ == '__main__':
-    db.create_all()
+
     app.run(debug=True)
