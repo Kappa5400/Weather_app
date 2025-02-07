@@ -6,6 +6,7 @@ import requests_cache
 from retry_requests import retry
 from datetime import timedelta
 from sqlalchemy.testing import db
+from sqlalchemy.orm import DeclarativeBase
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite"
@@ -13,11 +14,16 @@ app.secret_key = "hello"
 app.config['SQALCHEMY_DATABASE_URI'] = 'sqlite:///cities.sqlite3'
 app.config["SQALCHEMY_TRACK_MODIFICATIONS"] = False
 app.permanent_session_lifetime = timedelta(minutes=5)
+db.init_app(app)
 
 cache_session = requests_cache.CachedSession(".cache', expires_after = 3600")
 retry_session = retry(cache_session, retries = 5, backoff_factor =0.2)
 openmeteo = openmeteo_requests.Client(session = retry_session)
 
+class Base(DeclarativeBase):
+    pass
+
+db = SQLAlchemy(model_class=Base)
 
 def get_geo(city):
 
@@ -109,7 +115,6 @@ def home():
     else:
         if "city" in session:
             city = session["city"]
-    #clear session, still use city.
     return render_template('data.html', city=city)
 
 
