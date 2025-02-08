@@ -134,7 +134,8 @@ def home():
                         VALUES (?, ?, ?)
                     """, (city, coordinates, elevation))
             cities.commit()
-            return render_template("/data.html")
+            db_cities = query_db("SELECT name, coordinates, elevation FROM cities")
+            return render_template("/data.html", cities=db_cities)
     else:
         return render_template('index.html')
 
@@ -157,7 +158,8 @@ def tokyo():
 
 @app.route('/data')
 def data():
-    return render_template('data.html')
+    cities = query_db("SELECT name, coordinates, elevation FROM cities")
+    return render_template('data.html', cities=cities)
 
 if __name__ == '__main__':
     init_db()
