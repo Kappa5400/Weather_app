@@ -8,8 +8,7 @@ from datetime import datetime
 from retry_requests import retry
 import sqlite3
 from os import path
-from openmeteopy import OpenMeteo
-from openmeteopy.options import GeocodingOptions
+
 
 
 app = Flask(__name__)
@@ -23,9 +22,7 @@ cache_session = requests_cache.CachedSession(".cache', expires_after = 3600")
 retry_session = retry(cache_session, retries = 5, backoff_factor =0.2)
 openmeteo = openmeteo_requests.Client(session = retry_session)
 
-options = GeocodingOptions("casablanca")
 
-mgr = OpenMeteo(options)
 
 DATABASE = 'database.db'
 db = sqlite3.connect(path.join(ROOT, 'database.db'))

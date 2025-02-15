@@ -19,15 +19,22 @@
                 <th>City</th>
                 <th>Coordinates</th>
                 <th>Elevation</th>
+                <th>Comment</th>
+                <th>Delete</th>
             </tr>
          {% for city in cities %}
                         <tr>
                             <td>{{ city[0] }}</td>
                             <td>{{ city[1] }}</td>
                             <td>{{ city[2] }}</td>
+                            <td><input type="text" id="Com" name="comment"/></td>
+                            <td><input type="checkbox" id="del" name="delete"/>
+                                <label for="del"></label></td>
                         </tr>
                     {% endfor %}
             </table>
+            <button id="update" name="update">Update</button>
         {% endblock %}
+
     </body>
 </html>
