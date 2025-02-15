@@ -122,7 +122,6 @@ def home():
         if city =='':
             return render_template('index.html')
         lat, long = get_geo(city)
-
         weather = get_weather(city, lat,long)
         coordinates = weather["Coordinates"]
         elevation = weather["Elevation"]
@@ -159,13 +158,16 @@ def tokyo():
 def data():
     cities = query_db("SELECT name, coordinates, elevation FROM cities")
     if request.method =="POST":
-        if "update" in request.form:
-            return render_template("data.html", cities=cities)
-    print("Cities:", cities)
-    if not cities:
-        flash("No cities found in the database.", "info")
-        return render_template('data.html', cities=[])
-    return render_template('data.html', cities=cities)
+        print(request.form)
+        delete = str(request.form.getlist("delete"))
+        drop = str(request.form.get("drop"))
+        comment = str(request.form.get("comment"))
+        print (delete)
+        print(drop)
+        print(comment)
+        return render_template("data.html", cities=cities)
+    else:
+        return render_template('data.html', cities=cities)
 
 
 if __name__ == '__main__':

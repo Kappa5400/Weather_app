@@ -4,7 +4,6 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <h1>Data</h1>
     <style>
         table, th, td {
         border:1px solid black;
@@ -15,6 +14,7 @@
     {% extends "base.html" %}
     {% block content %}
     {% if cities %}
+    <form action="" method="POST">
         <table style="width:100%">
             <tr>
                 <th>City</th>
@@ -29,26 +29,27 @@
                             <td>{{ city[1] }}</td>
                             <td>{{ city[2] }}</td>
                             <td>{{ city[3] }}</td>
-                            <td><input type="checkbox" id="del" name="delete" />
+                            <td><input type="checkbox" name="delete" value = "{{ city[0] }}"/>
                                 <label for="del"></label></td>
                         </tr>
             {% endfor %}
             {% else %}
                 <p>No cities found in the database.</p>
-                {% endif %}
+            {% endif %}
             </table>
 
-            <label for="city">Choose a city:</label>
-            <select> name="city" id="city">
-                <option value ="No"</option>
-                    {% for city in cities%}
-                    <option values={{ city[0] }}>{{ city[0] }}</option>
-                    {% endfor %}}
-            </select>
-                <label> Add a comment</label><input type="text" id="com" name="comment" />
 
-            <form action="" method="POST">
-                <button name="update">Update</button>
+                <label for="drop">Choose a city:</label>
+                <select name="drop" id="city">
+                    <option value = "none">No comment</option>
+                        {% for city in cities%}
+                            <option value="{{ city[0] }}">{{ city[0] }}</option>
+                        {% endfor %}
+                </select>
+
+                <label> Add a comment:</label><input type="text" id="com" name="comment" />
+
+                <button  name="update">Update</button>
             </form>
         {% endblock %}
 
