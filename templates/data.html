@@ -14,6 +14,7 @@
     <body>
     {% extends "base.html" %}
     {% block content %}
+    {% if cities %}
         <table style="width:100%">
             <tr>
                 <th>City</th>
@@ -27,13 +28,28 @@
                             <td>{{ city[0] }}</td>
                             <td>{{ city[1] }}</td>
                             <td>{{ city[2] }}</td>
-                            <td><input type="text" id="Com" name="comment"/></td>
-                            <td><input type="checkbox" id="del" name="delete"/>
+                            <td>{{ city[3] }}</td>
+                            <td><input type="checkbox" id="del" name="delete" />
                                 <label for="del"></label></td>
                         </tr>
-                    {% endfor %}
+            {% endfor %}
+            {% else %}
+                <p>No cities found in the database.</p>
+                {% endif %}
             </table>
-            <button id="update" name="update">Update</button>
+
+            <label for="city">Choose a city:</label>
+            <select> name="city" id="city">
+                <option value ="No"</option>
+                    {% for city in cities%}
+                    <option values={{ city[0] }}>{{ city[0] }}</option>
+                    {% endfor %}}
+            </select>
+                <label> Add a comment</label><input type="text" id="com" name="comment" />
+
+            <form action="" method="POST">
+                <button name="update">Update</button>
+            </form>
         {% endblock %}
 
     </body>

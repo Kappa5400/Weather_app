@@ -119,6 +119,8 @@ def close_db(e=None):
 def home():
     if request.method == 'POST':
         city = request.form['city']
+        if city =='':
+            return render_template('index.html')
         lat, long = get_geo(city)
 
         weather = get_weather(city, lat,long)
@@ -153,10 +155,18 @@ def tokyo():
     weather = get_weather("Tokyo",36, 140)
     return render_template('city.html', city = "Tokyo", weather = weather)
 
-@app.route('/data')
+@app.route('/data', methods=["POST", "GET"] )
 def data():
     cities = query_db("SELECT name, coordinates, elevation FROM cities")
+    if request.method =="POST":
+        if "update" in request.form:
+            return render_template("data.html", cities=cities)
+    print("Cities:", cities)
+    if not cities:
+        flash("No cities found in the database.", "info")
+        return render_template('data.html', cities=[])
     return render_template('data.html', cities=cities)
+
 
 if __name__ == '__main__':
     init_db()
