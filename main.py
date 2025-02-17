@@ -158,6 +158,7 @@ def tokyo():
 def data():
     cities = query_db("SELECT name, coordinates, elevation FROM cities")
     if request.method =="POST":
+        cities = query_db("SELECT name, coordinates, elevation FROM cities")
         print(request.form)
         delete = str(request.form.getlist("delete"))
         drop = str(request.form.get("drop"))
@@ -167,7 +168,7 @@ def data():
         print(comment)
         return render_template("data.html", cities=cities)
     else:
-        return render_template('data.html', cities=cities)
+        return render_template("data.html", cities=cities)
 
 
 if __name__ == '__main__':
