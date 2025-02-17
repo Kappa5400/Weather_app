@@ -8,8 +8,7 @@ from datetime import datetime
 from retry_requests import retry
 import sqlite3
 from os import path
-from openmeteopy import OpenMeteo
-from openmeteopy.options import GeocodingOptions
+
 
 
 app = Flask(__name__)
@@ -23,9 +22,7 @@ cache_session = requests_cache.CachedSession(".cache', expires_after = 3600")
 retry_session = retry(cache_session, retries = 5, backoff_factor =0.2)
 openmeteo = openmeteo_requests.Client(session = retry_session)
 
-options = GeocodingOptions("casablanca")
 
-mgr = OpenMeteo(options)
 
 DATABASE = 'database.db'
 db = sqlite3.connect(path.join(ROOT, 'database.db'))
@@ -122,8 +119,9 @@ def close_db(e=None):
 def home():
     if request.method == 'POST':
         city = request.form['city']
+        if city =='':
+            return render_template('index.html')
         lat, long = get_geo(city)
-
         weather = get_weather(city, lat,long)
         coordinates = weather["Coordinates"]
         elevation = weather["Elevation"]
@@ -134,7 +132,8 @@ def home():
                         VALUES (?, ?, ?)
                     """, (city, coordinates, elevation))
             cities.commit()
-            return render_template("/data.html")
+            db_cities = query_db("SELECT name, coordinates, elevation FROM cities")
+            return render_template("/data.html", cities=db_cities)
     else:
         return render_template('index.html')
 
@@ -155,9 +154,21 @@ def tokyo():
     weather = get_weather("Tokyo",36, 140)
     return render_template('city.html', city = "Tokyo", weather = weather)
 
-@app.route('/data')
+@app.route('/data', methods=["POST", "GET"] )
 def data():
-    return render_template('data.html')
+    cities = query_db("SELECT name, coordinates, elevation FROM cities")
+    if request.method =="POST":
+        print(request.form)
+        delete = str(request.form.getlist("delete"))
+        drop = str(request.form.get("drop"))
+        comment = str(request.form.get("comment"))
+        print (delete)
+        print(drop)
+        print(comment)
+        return render_template("data.html", cities=cities)
+    else:
+        return render_template('data.html', cities=cities)
+
 
 if __name__ == '__main__':
     init_db()
