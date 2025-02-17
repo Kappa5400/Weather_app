@@ -166,6 +166,27 @@ def data():
         print (delete)
         print(drop)
         print(comment)
+        
+        if comment in request.form is not '' and drop != 'none':
+            with sqlite3.connect("database.db") as cities:
+                cursor = cities.cursor()
+                cursor.execute(f"""
+                            INSERT INTO cities (comment)
+                            VALUES ({comment})
+                        """, (comment))
+                cities.commit()
+
+
+        if delete in request.form:
+            with sqlite3.connect("database.db") as cities:
+                cursor = cities.cursor()
+                
+                cursor.execute(f"""
+                            INSERT INTO cities (name, coordinates, elevation)
+                            VALUES (?)
+                        """, (city, coordinates, elevation))
+                cities.commit()       
+
         return render_template("data.html", cities=cities)
     else:
         return render_template("data.html", cities=cities)
