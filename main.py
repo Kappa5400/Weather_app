@@ -125,14 +125,15 @@ def home():
         weather = get_weather(city, lat,long)
         coordinates = weather["Coordinates"]
         elevation = weather["Elevation"]
+        comment = ""
         with sqlite3.connect("database.db") as cities:
             cursor = cities.cursor()
             cursor.execute("""
-                        INSERT INTO cities (name, coordinates, elevation)
-                        VALUES (?, ?, ?)
-                    """, (city, coordinates, elevation))
+                        INSERT INTO cities (name, coordinates, elevation, comment)
+                        VALUES (?, ?, ?, ?)
+                    """, (city, coordinates, elevation, comment))
             cities.commit()
-            db_cities = query_db("SELECT name, coordinates, elevation FROM cities")
+            db_cities = query_db("SELECT name, coordinates, elevation, comment FROM cities")
             return render_template("/data.html", cities=db_cities)
     else:
         return render_template('index.html')
@@ -156,37 +157,33 @@ def tokyo():
 
 @app.route('/data', methods=["POST", "GET"] )
 def data():
-    cities = query_db("SELECT name, coordinates, elevation FROM cities")
+    cities = query_db("SELECT name, coordinates, elevation, comment FROM cities")
     if request.method =="POST":
-        cities = query_db("SELECT name, coordinates, elevation FROM cities")
         print(request.form)
-        delete = str(request.form.getlist("delete"))
-        drop = str(request.form.get("drop"))
+        delete = request.form.get("delete")
+        drop = request.form.get("drop")
         comment = str(request.form.get("comment"))
         print (delete)
         print(drop)
         print(comment)
-        
-        if comment in request.form is not '' and drop != 'none':
+        if 'comment' in request.form is not '' and drop != 'none':
+            print("Commenting!")
             with sqlite3.connect("database.db") as cities:
                 cursor = cities.cursor()
-                cursor.execute(f"""
-                            INSERT INTO cities (comment)
-                            VALUES ({comment})
-                        """, (comment))
+                cursor.execute(f"""UPDATE cities 
+                               SET comment = '{comment}' 
+                               WHERE name ='{drop}';""")
                 cities.commit()
 
-
-        if delete in request.form:
+        if 'delete' in request.form:
             with sqlite3.connect("database.db") as cities:
                 cursor = cities.cursor()
-                
+                print("Deleting!")
                 cursor.execute(f"""
-                            INSERT INTO cities (name, coordinates, elevation)
-                            VALUES (?)
-                        """, (city, coordinates, elevation))
+                            DELETE FROM cities 
+                            WHERE name ='{delete}';""")
                 cities.commit()       
-
+        cities = query_db("SELECT name, coordinates, elevation, comment FROM cities")
         return render_template("data.html", cities=cities)
     else:
         return render_template("data.html", cities=cities)
