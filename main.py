@@ -157,7 +157,7 @@ def tokyo():
 
 @app.route('/data', methods=["POST", "GET"] )
 def data():
-    cities = query_db("SELECT name, coordinates, elevation, comment FROM cities")
+    print("Start!")
     if request.method =="POST":
         print(request.form)
         delete = request.form.get("delete")
@@ -166,7 +166,22 @@ def data():
         print (delete)
         print(drop)
         print(comment)
-        if 'comment' in request.form is not '' and drop != 'none':
+
+        if 'comment' in request.form and drop!= 'none' and 'delete' in request.form:
+            print("Double trouble!")
+            with sqlite3.connect("database.db") as cities:
+                cursor = cities.cursor()
+                cursor.execute(f"""UPDATE cities 
+                               SET comment = '{comment}' 
+                               WHERE name ='{drop}';""")
+                cursor.execute(f"""
+                            DELETE FROM cities 
+                            WHERE name ='{delete}';""")
+                cities.commit()
+                cities = query_db("SELECT name, coordinates, elevation, comment FROM cities")
+                return render_template("data.html", cities=cities)
+
+        if 'comment' in request.form and drop != 'none':
             print("Commenting!")
             with sqlite3.connect("database.db") as cities:
                 cursor = cities.cursor()
@@ -182,11 +197,10 @@ def data():
                 cursor.execute(f"""
                             DELETE FROM cities 
                             WHERE name ='{delete}';""")
-                cities.commit()       
-        cities = query_db("SELECT name, coordinates, elevation, comment FROM cities")
-        return render_template("data.html", cities=cities)
-    else:
-        return render_template("data.html", cities=cities)
+                cities.commit()  
+    print("End!")
+    cities = query_db("SELECT name, coordinates, elevation, comment FROM cities")
+    return render_template("data.html", cities=cities)
 
 
 if __name__ == '__main__':
