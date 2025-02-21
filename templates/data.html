@@ -13,6 +13,13 @@
     <body>
     {% extends "base.html" %}
     {% block content %}
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for msg in messages %}
+                    <p>{{msg}}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
     {% if cities %}
     <form action="" method="POST">
         <table style="width:100%">
@@ -51,7 +58,7 @@
 
                 <button  name="update">Update</button>
             </form>
-        {% endblock %}
+    {% endblock %}
 
     </body>
 </html>

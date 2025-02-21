@@ -13,7 +13,7 @@ from os import path
 
 app = Flask(__name__)
 
-app.config['SECRET_KEY'] = os.urandom((24))
+app.config['SECRET_KEY'] = os.urandom(24)
 app.config['DATABASE'] = 'database.db'
 
 ROOT = path.dirname(path.realpath(__file__))
@@ -120,6 +120,7 @@ def home():
     if request.method == 'POST':
         city = request.form['city']
         if city =='':
+            flash("There is nothing in the search box!")
             return render_template('index.html')
         lat, long = get_geo(city)
         weather = get_weather(city, lat,long)
@@ -128,13 +129,21 @@ def home():
         comment = ""
         with sqlite3.connect("database.db") as cities:
             cursor = cities.cursor()
-            cursor.execute("""
+            cursor.execute(f"""SELECT exists(SELECT 1 FROM cities WHERE name="{city}");""")
+            result = cursor.fetchone()
+            print(result)
+            if result is None:
+                cursor.execute("""
                         INSERT INTO cities (name, coordinates, elevation, comment)
                         VALUES (?, ?, ?, ?)
                     """, (city, coordinates, elevation, comment))
-            cities.commit()
-            db_cities = query_db("SELECT name, coordinates, elevation, comment FROM cities")
-            return render_template("/data.html", cities=db_cities)
+                cities.commit()
+                db_cities = query_db("SELECT name, coordinates, elevation, comment FROM cities")
+                return render_template("/data.html", cities=db_cities)
+            else:
+                flash(f"{city} already exists in the database!")
+                return render_template("index.html")
+
     else:
         return render_template('index.html')
 
@@ -169,17 +178,20 @@ def data():
 
         if 'comment' in request.form and drop!= 'none' and 'delete' in request.form:
             print("Double trouble!")
-            with sqlite3.connect("database.db") as cities:
-                cursor = cities.cursor()
-                cursor.execute(f"""UPDATE cities 
-                               SET comment = '{comment}' 
-                               WHERE name ='{drop}';""")
-                cursor.execute(f"""
-                            DELETE FROM cities 
-                            WHERE name ='{delete}';""")
-                cities.commit()
-                cities = query_db("SELECT name, coordinates, elevation, comment FROM cities")
-                return render_template("data.html", cities=cities)
+            flash("You can only delete or comment, not do both at the same time!")
+
+            #with sqlite3.connect("database.db") as cities:
+            #    cursor = cities.cursor()
+            #    cursor.execute(f"""UPDATE cities
+            #                   SET comment = '{comment}'
+            #                   WHERE name ='{drop}';""")
+            #    cursor.execute(f"""
+            #                DELETE FROM cities
+            #                WHERE name ='{delete}';""")
+            #    cities.commit()
+            cities = query_db("SELECT name, coordinates, elevation, comment FROM cities")
+
+            return render_template("data.html", cities=cities)
 
         if 'comment' in request.form and drop != 'none':
             print("Commenting!")
