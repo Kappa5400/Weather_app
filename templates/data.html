@@ -21,7 +21,7 @@
             {% endif %}
         {% endwith %}
     {% if cities %}
-    <form action="" method="POST">
+    <form action="{{ url_for('data')}}" method="POST">
         <table style="width:100%">
             <tr>
                 <th>City</th>
@@ -56,7 +56,7 @@
 
                 <label> Add a comment:</label><input type="text" id="com" name="comment" />
 
-                <button  name="update">Update</button>
+                <input type="submit" value ="Update">
             </form>
     {% endblock %}
 

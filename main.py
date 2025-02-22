@@ -118,7 +118,7 @@ def close_db(e=None):
 @app.route('/', methods=["POST", "GET"] )
 def home():
     if request.method == 'POST':
-        city = request.form['city']
+        city = request.form.get('city','')
         if city =='':
             flash("There is nothing in the search box!")
             return render_template('index.html')
@@ -131,8 +131,10 @@ def home():
             cursor = cities.cursor()
             cursor.execute(f"""SELECT exists(SELECT 1 FROM cities WHERE name="{city}");""")
             result = cursor.fetchone()
+            result = result[0]
             print(result)
-            if result is None:
+            print(type(result))
+            if result is (0):
                 cursor.execute("""
                         INSERT INTO cities (name, coordinates, elevation, comment)
                         VALUES (?, ?, ?, ?)
@@ -178,17 +180,15 @@ def data():
 
         if 'comment' in request.form and drop!= 'none' and 'delete' in request.form:
             print("Double trouble!")
-            flash("You can only delete or comment, not do both at the same time!")
-
-            #with sqlite3.connect("database.db") as cities:
-            #    cursor = cities.cursor()
-            #    cursor.execute(f"""UPDATE cities
-            #                   SET comment = '{comment}'
-            #                   WHERE name ='{drop}';""")
-            #    cursor.execute(f"""
-            #                DELETE FROM cities
-            #                WHERE name ='{delete}';""")
-            #    cities.commit()
+            with sqlite3.connect("database.db") as cities:
+                cursor = cities.cursor()
+                cursor.execute(f"""UPDATE cities
+                              SET comment = '{comment}'
+                              WHERE name ='{drop}';""")
+                cursor.execute(f"""
+                            DELETE FROM cities
+                           WHERE name ='{delete}';""")
+                cities.commit()
             cities = query_db("SELECT name, coordinates, elevation, comment FROM cities")
 
             return render_template("data.html", cities=cities)
